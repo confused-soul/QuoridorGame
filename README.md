@@ -69,5 +69,33 @@ npm run dev
    - **You cannot completely block** the opponent's path to their goal.
    - **Jump**: If pawns are face-to-face, you can jump over the opponent (or diagonally if blocked).
 
+
+## Project Directory Layout
+
+```
+aphelion-glenn/
+├── public/              # Static assets
+├── server/              # Backend
+│   ├── game/            # Game Logic & Rooms
+│   │   ├── QuoridorGame.js
+│   │   └── RoomManager.js
+│   ├── index.js         # Entry Point (Socket.io)
+│   └── package.json
+├── src/                 # Frontend (React)
+│   ├── assets/
+│   ├── components/      # UI Components
+│   │   ├── GameBoard.jsx
+│   │   └── GameBoard.css
+│   ├── hooks/           # Custom Hooks
+│   │   └── useGameSocket.js
+│   ├── App.jsx          # Main App Component
+│   ├── App.css
+│   ├── main.jsx         # React Entry Point
+│   └── index.css
+├── index.html           # Vite HTML Entry
+├── vite.config.js       # Vite Config
+└── package.json         # Frontend Dependencies
+```
+
 ## License
 MIT

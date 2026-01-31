@@ -8,14 +8,19 @@ const app = express();
 app.use(cors());
 
 const server = createServer(app);
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://onlinequoridorgame.onrender.com"
+];
+
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: allowedOrigins,
         methods: ["GET", "POST"]
     }
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-const ENDPOINT = 'http://localhost:3001';
+
+const ENDPOINT = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 export const useGameSocket = () => {
     const socketRef = useRef(null);
