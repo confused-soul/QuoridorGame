@@ -1,0 +1,122 @@
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.board {
+    display: grid;
+    /* 9 tiles (40px) + 8 gaps (10px) */
+    grid-template-columns: repeat(8, 40px 10px) 40px;
+    grid-template-rows: repeat(8, 40px 10px) 40px;
+    background-color: #2c3e50;
+    padding: 10px;
+    border-radius: 8px;
+    user-select: none;
+}
+
+.tile {
+    width: 40px;
+    height: 40px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.tile:hover {
+    background-color: #bdc3c7;
+}
+
+.tile.valid-move {
+    background-color: #a9dfbf;
+    /* Green tint */
+}
+
+/* Spaces between tiles for walls */
+.v-gap {
+    width: 10px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.h-gap {
+    width: 40px;
+    height: 10px;
+    cursor: pointer;
+}
+
+.corner-gap {
+    width: 10px;
+    height: 10px;
+    /* Usually not interactive unless we want to handle wall placement clicking on corner? 
+       Typically click the gap between tiles. */
+}
+
+/* Wall Styles */
+.wall {
+    background-color: #e74c3c;
+    border-radius: 2px;
+}
+
+.wall-preview {
+    background-color: rgba(231, 76, 60, 0.5);
+}
+
+/* Placed Walls - We might render them absolutely or spans */
+/* Since wall spans 3 cells (gap + tile + gap) ? 
+   Wall len 2 tiles covers: Gap + Tile + Gap + Tile + Gap? No.
+   Wall length is 2 TILES.
+   So it covers: 
+   H-Wall: Covers a Horizontal Gap, the Corner Gap next to it, and the next Horizontal Gap?
+   Wait, Visual:
+   Tile | Tile
+   -------
+   Tile | Tile
+   A H-wall goes between the rows. It takes up the H-Gap space.
+   Lengths: 2 units -> 2 tiles width.
+   So it occupies: H-Gap, Corner-Gap, H-Gap.
+   
+   We will render walls as overlay elements or fill the gap cells.
+   Since our grid is physical cells, we can fill the cells.
+*/
+
+.player-pawn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.p0 {
+    background-color: #3498db;
+    border: 2px solid white;
+}
+
+.p1 {
+    background-color: #e67e22;
+    border: 2px solid white;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.btn {
+    padding: 8px 16px;
+    background: #34495e;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.btn.active {
+    background: #e74c3c;
+}
