@@ -12,7 +12,7 @@ const app = express();
  */
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://YOUR-FRONTEND-URL.onrender.com", // <-- change this after frontend deploy
+  "https://onlinequoridorgame.onrender.com", // <-- change this after frontend deploy
 ];
 
 app.use(
@@ -105,3 +105,4 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`SERVER RUNNING ON PORT ${PORT}`);
 });
+
