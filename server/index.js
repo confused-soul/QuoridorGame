@@ -6,13 +6,9 @@ import roomManager from "./game/RoomManager.js";
 
 const app = express();
 
-/**
- * ✅ Allow requests from your frontend
- * Add your frontend URL after deployment (Render Static Site URL)
- */
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://onlinequoridorgame.onrender.com", // <-- change this after frontend deploy
+    "https://onlinequoridorgame.onrender.com",
 ];
 
 app.use(
@@ -31,11 +27,52 @@ const io = new Server(server, {
 });
 const PORT = process.env.PORT || 3001;
 
+// Per-room timer state: code -> { interval, remaining }
+const roomTimers = new Map();
+
+function clearRoomTimer(code) {
+    if (roomTimers.has(code)) {
+        clearInterval(roomTimers.get(code).interval);
+        roomTimers.delete(code);
+    }
+}
+
+function startRoomTimer(code) {
+    clearRoomTimer(code);
+
+    const room = roomManager.getRoom(code);
+    if (!room) return;
+
+    const { game, timerDuration } = room;
+    let remaining = timerDuration;
+
+    // Emit the initial tick immediately so both clients see the full count
+    io.to(code).emit("timer_tick", { remaining });
+
+    const interval = setInterval(() => {
+        remaining -= 1;
+        io.to(code).emit("timer_tick", { remaining });
+
+        if (remaining <= 0) {
+            clearRoomTimer(code);
+            if (game.winner === null) {
+                game.skipTurn();
+                io.to(code).emit("game_update", game.getState());
+                // Start the next turn's timer
+                startRoomTimer(code);
+            }
+        }
+    }, 1000);
+
+    roomTimers.set(code, { interval, remaining });
+}
+
 io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`);
 
-    socket.on("create_room", (callback) => {
-        const code = roomManager.createRoom();
+    socket.on("create_room", ({ timerDuration } = {}, callback) => {
+        const duration = [15, 30, 60].includes(timerDuration) ? timerDuration : 30;
+        const code = roomManager.createRoom(duration);
         const result = roomManager.joinRoom(code, socket.id);
 
         socket.join(code);
@@ -53,6 +90,12 @@ io.on("connection", (socket) => {
         callback({ code, playerIndex: result.playerIndex });
 
         io.to(code).emit("game_update", result.game.getState());
+
+        // Both players are now in — start the timer
+        const room = roomManager.getRoom(code);
+        if (room && room.game.players[0].id && room.game.players[1].id) {
+            startRoomTimer(code);
+        }
     });
 
     socket.on("move", ({ code, x, y }) => {
@@ -68,9 +111,12 @@ io.on("connection", (socket) => {
 
         if (playerId !== -1) {
             if (game.movePlayer(playerId, x, y)) {
+                clearRoomTimer(code);
                 io.to(code).emit("game_update", game.getState());
                 if (game.winner !== null) {
                     io.to(code).emit("game_over", { winner: playerId });
+                } else {
+                    startRoomTimer(code);
                 }
             }
         }
@@ -89,7 +135,9 @@ io.on("connection", (socket) => {
 
         if (playerId !== -1) {
             if (game.placeWall(playerId, x, y, orientation)) {
+                clearRoomTimer(code);
                 io.to(code).emit("game_update", game.getState());
+                startRoomTimer(code);
             }
         }
     });
@@ -102,4 +150,3 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
     console.log(`SERVER RUNNING ON PORT ${PORT}`);
 });
-

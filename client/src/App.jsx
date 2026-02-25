@@ -3,6 +3,12 @@ import { useGameSocket } from './hooks/useGameSocket';
 import GameBoard from './components/GameBoard';
 import './App.css';
 
+const TIMER_OPTIONS = [
+    { label: '15s', value: 15 },
+    { label: '30s', value: 30 },
+    { label: '1 min', value: 60 },
+];
+
 function App() {
     const {
         gameState,
@@ -10,6 +16,7 @@ function App() {
         playerIndex,
         winner,
         error,
+        timerSeconds,
         createRoom,
         joinRoom,
         movePawn,
@@ -17,6 +24,11 @@ function App() {
     } = useGameSocket();
 
     const [joinCode, setJoinCode] = useState('');
+    const [timerDuration, setTimerDuration] = useState(30);
+
+    const handleCreate = () => {
+        createRoom(timerDuration);
+    };
 
     const handleJoin = () => {
         if (joinCode.length > 0) {
@@ -31,7 +43,8 @@ function App() {
         alert('Room code copied!');
     };
 
-    if (roomCode && gameState) {
+    // Only render the game board once we have both gameState AND playerIndex confirmed
+    if (roomCode && gameState && playerIndex !== null) {
         return (
             <div className="app-container">
                 <header className="game-header">
@@ -47,9 +60,22 @@ function App() {
                 <GameBoard
                     gameState={gameState}
                     playerIndex={playerIndex}
+                    timerSeconds={timerSeconds}
                     onMove={movePawn}
                     onPlaceWall={placeWall}
                 />
+            </div>
+        );
+    }
+
+    // Show a waiting screen if we've joined/created a room but playerIndex isn't set yet
+    if (roomCode && gameState && playerIndex === null) {
+        return (
+            <div className="lobby-container">
+                <h1>Quoridor Online</h1>
+                <div className="card">
+                    <p>Connecting to room <strong>{roomCode}</strong>…</p>
+                </div>
             </div>
         );
     }
@@ -58,7 +84,21 @@ function App() {
         <div className="lobby-container">
             <h1>Quoridor Online</h1>
             <div className="card">
-                <button className="primary-btn" onClick={() => createRoom()}>Create New Game</button>
+                <div className="timer-select">
+                    <p className="timer-label">Choose Turn Timer:</p>
+                    <div className="timer-options">
+                        {TIMER_OPTIONS.map((opt) => (
+                            <button
+                                key={opt.value}
+                                className={`timer-btn ${timerDuration === opt.value ? 'active' : ''}`}
+                                onClick={() => setTimerDuration(opt.value)}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <button className="primary-btn" onClick={handleCreate}>Create New Game</button>
                 <div className="divider">OR</div>
                 <div className="join-form">
                     <input

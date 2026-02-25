@@ -7,9 +7,13 @@ export const useGameSocket = () => {
     const socketRef = useRef(null);
     const [gameState, setGameState] = useState(null);
     const [roomCode, setRoomCode] = useState(null);
+    // Use a ref to keep playerIndex in sync immediately (avoids stale closure
+    // race condition where gameState updates before playerIndex state is set).
+    const playerIndexRef = useRef(null);
     const [playerIndex, setPlayerIndex] = useState(null);
     const [winner, setWinner] = useState(null);
     const [error, setError] = useState(null);
+    const [timerSeconds, setTimerSeconds] = useState(null);
 
     useEffect(() => {
         socketRef.current = io(ENDPOINT);
@@ -22,17 +26,23 @@ export const useGameSocket = () => {
             setWinner(winner);
         });
 
+        socketRef.current.on('timer_tick', ({ remaining }) => {
+            setTimerSeconds(remaining);
+        });
+
         return () => {
             socketRef.current.disconnect();
         };
     }, []);
 
-    const createRoom = (callback) => {
-        socketRef.current.emit('create_room', (res) => {
-            if (res.error) setError(res.error);
-            else {
-                setRoomCode(res.code);
+    const createRoom = (timerDuration, callback) => {
+        socketRef.current.emit('create_room', { timerDuration }, (res) => {
+            if (res.error) {
+                setError(res.error);
+            } else {
+                playerIndexRef.current = res.playerIndex;
                 setPlayerIndex(res.playerIndex);
+                setRoomCode(res.code);
                 if (callback) callback(res.code);
             }
         });
@@ -44,8 +54,9 @@ export const useGameSocket = () => {
                 setError(res.error);
                 if (callback) callback(false);
             } else {
-                setRoomCode(res.code);
+                playerIndexRef.current = res.playerIndex;
                 setPlayerIndex(res.playerIndex);
+                setRoomCode(res.code);
                 if (callback) callback(true);
             }
         });
@@ -70,6 +81,7 @@ export const useGameSocket = () => {
         playerIndex,
         winner,
         error,
+        timerSeconds,
         createRoom,
         joinRoom,
         movePawn,

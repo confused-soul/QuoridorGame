@@ -195,6 +195,15 @@ class QuoridorGame {
         return false;
     }
 
+    /**
+     * Skip the current player's turn (called when timer expires).
+     */
+    skipTurn() {
+        if (this.winner !== null) return false;
+        this.turn = 1 - this.turn;
+        return true;
+    }
+
     getState() {
         return {
             players: this.players,

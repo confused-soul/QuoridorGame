@@ -100,3 +100,45 @@ input {
     padding: 5px;
     border-radius: 4px;
 }
+
+/* ---- Timer Selector (Lobby) ---- */
+.timer-select {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.timer-label {
+    margin: 0;
+    color: #bdc3c7;
+    font-size: 0.85rem;
+}
+
+.timer-options {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.timer-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: 2px solid #34495e;
+    background: transparent;
+    color: #ecf0f1;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.timer-btn:hover {
+    border-color: #e67e22;
+    color: #e67e22;
+}
+
+.timer-btn.active {
+    background: #e67e22;
+    border-color: #e67e22;
+    color: white;
+}
