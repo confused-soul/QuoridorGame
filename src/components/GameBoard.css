@@ -1,115 +1,364 @@
-
+/* ─────────────────────────────────────────
+   GAME CONTAINER
+───────────────────────────────────────── */
 .game-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
+    padding: 16px 0;
 }
 
+/* ─────────────────────────────────────────
+   TOP BAR  (Room Code | Timer | Turn)
+───────────────────────────────────────── */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 490px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 12px 20px;
+    box-sizing: border-box;
+}
+
+/* Room badge */
+.room-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.room-label {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: #7f8c9e;
+    text-transform: uppercase;
+}
+
+.room-code {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 4px;
+    color: #e0e6ef;
+    font-family: 'Courier New', monospace;
+}
+
+/* Timer ring */
+.timer-ring {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.timer-track {
+    fill: none;
+    stroke: rgba(46, 204, 113, 0.25);
+    stroke-width: 3.5;
+}
+
+.timer-number {
+    position: relative;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #2ecc71;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s;
+    z-index: 1;
+}
+
+.timer-ring.urgent .timer-track {
+    stroke: rgba(231, 76, 60, 0.3);
+}
+
+.timer-ring.urgent .timer-number {
+    color: #e74c3c;
+    animation: pulse-text 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-text {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 0.6;
+        transform: scale(1.15);
+    }
+}
+
+/* Turn badge */
+.turn-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.turn-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.turn-badge.my-turn {
+    background: rgba(46, 204, 113, 0.15);
+    color: #2ecc71;
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.turn-badge.my-turn .turn-dot {
+    background: #2ecc71;
+    box-shadow: 0 0 6px #2ecc71;
+    animation: blink-dot 1s ease-in-out infinite alternate;
+}
+
+.turn-badge.opp-turn {
+    background: rgba(231, 76, 60, 0.12);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.turn-badge.opp-turn .turn-dot {
+    background: #e74c3c;
+}
+
+@keyframes blink-dot {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0.3;
+    }
+}
+
+/* ─────────────────────────────────────────
+   BOARD
+───────────────────────────────────────── */
 .board {
     display: grid;
-    /* 9 tiles (40px) + 8 gaps (10px) */
-    grid-template-columns: repeat(8, 40px 10px) 40px;
-    grid-template-rows: repeat(8, 40px 10px) 40px;
-    background-color: #2c3e50;
-    padding: 10px;
-    border-radius: 8px;
+    grid-template-columns: repeat(8, 44px 8px) 44px;
+    grid-template-rows: repeat(8, 44px 8px) 44px;
+    background: linear-gradient(135deg, #1a2535 0%, #243044 100%);
+    padding: 12px;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     user-select: none;
 }
 
-.cell {
-    /* Base cell style */
-}
-
 .tile {
-    width: 40px;
-    height: 40px;
-    background-color: #ecf0f1;
-    border-radius: 4px;
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(145deg, #2d3f55, #253348);
+    border-radius: 6px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     position: relative;
+    transition: background 0.15s;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .tile:hover {
-    background-color: #bdc3c7;
+    background: linear-gradient(145deg, #3a516e, #2d4159);
 }
 
-.tile.valid-move {
-    background-color: #a9dfbf; /* Green tint */
-}
-
-/* Spaces between tiles for walls */
 .v-gap {
-    width: 10px;
-    height: 40px;
+    width: 8px;
+    height: 44px;
     cursor: pointer;
-}
-.h-gap {
-    width: 40px;
-    height: 10px;
-    cursor: pointer;
-}
-.corner-gap {
-    width: 10px;
-    height: 10px;
-    /* Usually not interactive unless we want to handle wall placement clicking on corner? 
-       Typically click the gap between tiles. */
-}
-
-/* Wall Styles */
-.wall {
-    background-color: #e74c3c;
     border-radius: 2px;
-}
-.wall-preview {
-    background-color: rgba(231, 76, 60, 0.5);
+    transition: background 0.15s;
 }
 
-/* Placed Walls - We might render them absolutely or spans */
-/* Since wall spans 3 cells (gap + tile + gap) ? 
-   Wall len 2 tiles covers: Gap + Tile + Gap + Tile + Gap? No.
-   Wall length is 2 TILES.
-   So it covers: 
-   H-Wall: Covers a Horizontal Gap, the Corner Gap next to it, and the next Horizontal Gap?
-   Wait, Visual:
-   Tile | Tile
-   -------
-   Tile | Tile
-   A H-wall goes between the rows. It takes up the H-Gap space.
-   Lengths: 2 units -> 2 tiles width.
-   So it occupies: H-Gap, Corner-Gap, H-Gap.
-   
-   We will render walls as overlay elements or fill the gap cells.
-   Since our grid is physical cells, we can fill the cells.
-*/
-
-.player-pawn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+.v-gap:hover {
+    background: rgba(52, 152, 219, 0.3);
 }
 
-.p0 { background-color: #3498db; border: 2px solid white; }
-.p1 { background-color: #e67e22; border: 2px solid white; }
-
-.controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.btn {
-    padding: 8px 16px;
-    background: #34495e;
-    color: white;
-    border: none;
+.h-gap {
+    width: 44px;
+    height: 8px;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 2px;
+    transition: background 0.15s;
 }
-.btn.active {
+
+.h-gap:hover {
+    background: rgba(52, 152, 219, 0.3);
+}
+
+.corner-gap {
+    width: 8px;
+    height: 8px;
+}
+
+/* ─────────────────────────────────────────
+   WALLS
+───────────────────────────────────────── */
+.wall {
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+    border-radius: 3px;
+    box-shadow: 0 0 8px rgba(231, 76, 60, 0.5);
+}
+
+/* ─────────────────────────────────────────
+   PLAYER PAWNS
+───────────────────────────────────────── */
+.player-pawn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.player-pawn:hover {
+    transform: scale(1.1);
+}
+
+.p0 {
+    background: radial-gradient(circle at 35% 30%, #5dade2, #2980b9);
+    border: 2.5px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 3px 10px rgba(41, 128, 185, 0.5);
+}
+
+.p1 {
+    background: radial-gradient(circle at 35% 30%, #f0a500, #e67e22);
+    border: 2.5px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 3px 10px rgba(230, 126, 34, 0.5);
+}
+
+/* ─────────────────────────────────────────
+   BOTTOM CONTROLS
+───────────────────────────────────────── */
+.bottom-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 490px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 14px 20px;
+    box-sizing: border-box;
+    gap: 12px;
+}
+
+.mode-group {
+    display: flex;
+    gap: 8px;
+}
+
+.mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #8fa3be;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mode-btn:hover {
+    background: rgba(255, 255, 255, 0.09);
+    color: #c8d8ea;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.mode-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.mode-btn.move-active {
+    background: rgba(52, 152, 219, 0.2);
+    border-color: #3498db;
+    color: #5dade2;
+    box-shadow: 0 0 12px rgba(52, 152, 219, 0.25);
+}
+
+.mode-btn.wall-active {
+    background: rgba(231, 76, 60, 0.2);
+    border-color: #e74c3c;
+    color: #ff7675;
+    box-shadow: 0 0 12px rgba(231, 76, 60, 0.25);
+}
+
+/* Walls pips counter */
+.walls-counter {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.walls-pips {
+    display: flex;
+    gap: 4px;
+}
+
+.pip {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.pip-on {
     background: #e74c3c;
+    box-shadow: 0 0 4px rgba(231, 76, 60, 0.5);
+}
+
+.pip-off {
+    background: rgba(255, 255, 255, 0.08);
+    transform: scale(0.85);
+}
+
+.walls-label {
+    font-size: 0.65rem;
+    color: #7f8c9e;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Loading */
+.loading {
+    color: #7f8c9e;
+    font-size: 1rem;
+    padding: 40px;
 }
